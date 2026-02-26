@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Mol holati</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px }
+    .card { padding: 15px; border-radius: 10px; background: #f4f4f4; margin-bottom: 10px }
+  </style>
+</head>
+<body>
+
+<h2>🐄 Mol monitoring</h2>
+
+<div class="card" id="state"></div>
+<div class="card" id="times"></div>
+
+<script>
+async function loadData() {
+  const res = await fetch('http://192.168.100.18:3000/data');
+  const d = await res.json();
+
+  document.getElementById('state').innerHTML =
+    `<b>Hozirgi holat:</b> ${d.state}`;
+
+  document.getElementById('times').innerHTML = `
+    Yotgan: ${(d.lying_ms/60000).toFixed(1)} min<br>
+    Tik turgan: ${(d.standing_ms/60000).toFixed(1)} min<br>
+    Yurgan: ${(d.walking_ms/60000).toFixed(1)} min<br>
+    Yugurgan: ${(d.running_ms/60000).toFixed(1)} min
+  `;
+}
+
+setInterval(loadData, 2000);
+loadData();
+</script>
+
+</body>
+</html>
