@@ -1,38 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <title>Mol holati</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px }
-    .card { padding: 15px; border-radius: 10px; background: #f4f4f4; margin-bottom: 10px }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mol Harakat Monitoring</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f0f0f5; text-align:center; padding:20px;}
+h1 { color: #333; }
+#status { font-size: 1.2em; margin-bottom:20px; }
+.state-box { display:inline-block; width:120px; padding:15px; margin:10px; border-radius:10px; color:white; font-weight:bold; }
+.lying { background:#6c757d; }
+.sitting { background:#17a2b8; }
+.standing { background:#ffc107; color:#333; }
+.walking { background:#28a745; }
+.running { background:#dc3545; }
+</style>
 </head>
 <body>
 
-<h2>🐄 Mol monitoring</h2>
+<h1>🐄 Mol Harakat Monitoring</h1>
+<div id="status">Ulanish holati: <span id="online">❌</span></div>
 
-<div class="card" id="state"></div>
-<div class="card" id="times"></div>
+<div class="state-box lying" id="lying">Yotib turish: <span id="lying_ms">0</span> ms</div>
+<div class="state-box sitting" id="sitting">O‘tirib turish: <span id="sitting_ms">0</span> ms</div>
+<div class="state-box standing" id="standing">Turib turish: <span id="standing_ms">0</span> ms</div>
+<div class="state-box walking" id="walking">Yurish: <span id="walking_ms">0</span> ms</div>
+<div class="state-box running" id="running">Yugurish: <span id="running_ms">0</span> ms</div>
 
 <script>
-async function loadData() {
-  const res = await fetch('https://agro-tech-mzq2.onrender.com/data');
-  const d = await res.json();
+const onlineEl = document.getElementById("online");
 
-  document.getElementById('state').innerHTML =
-    `<b>Hozirgi holat:</b> ${d.state}`;
+async function updateStatus(){
+  try{
+    const res = await fetch("https://agro-tech-mzq2.onrender.com/status");
+    const data = await res.json();
 
-  document.getElementById('times').innerHTML = `
-    Yotgan: ${(d.lying_ms/60000).toFixed(1)} min<br>
-    Tik turgan: ${(d.standing_ms/60000).toFixed(1)} min<br>
-    Yurgan: ${(d.walking_ms/60000).toFixed(1)} min<br>
-    Yugurgan: ${(d.running_ms/60000).toFixed(1)} min
-  `;
+    onlineEl.textContent = data.online ? "🟢" : "❌";
+
+    ["lying","sitting","standing","walking","running"].forEach(state=>{
+      document.getElementById(state+"_ms").textContent = data.stats[state+"_ms"];
+    });
+
+  }catch(err){
+    console.error(err);
+    onlineEl.textContent = "❌";
+  }
 }
 
-setInterval(loadData, 2000);
-loadData();
+// Har 1 sekund yangilash
+setInterval(updateStatus, 1000);
+updateStatus();
 </script>
 
 </body>
