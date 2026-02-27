@@ -3,52 +3,490 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mol Harakat Monitoring</title>
+<title>AgroTech • Mol Harakat Monitoring</title>
 <style>
-body { font-family: Arial, sans-serif; background: #f0f0f5; text-align:center; padding:20px;}
-h1 { color: #333; }
-#status { font-size: 1.2em; margin-bottom:20px; }
-.state-box { display:inline-block; width:120px; padding:15px; margin:10px; border-radius:10px; color:white; font-weight:bold; }
-.lying { background:#6c757d; }
-.sitting { background:#17a2b8; }
-.standing { background:#ffc107; color:#333; }
-.walking { background:#28a745; }
-.running { background:#dc3545; }
+  :root{
+    --bg: #0b1220;
+    --card: rgba(255,255,255,0.08);
+    --card2: rgba(255,255,255,0.06);
+    --stroke: rgba(255,255,255,0.12);
+    --text: rgba(255,255,255,0.92);
+    --muted: rgba(255,255,255,0.65);
+    --shadow: 0 18px 55px rgba(0,0,0,0.35);
+
+    --lying: #94a3b8;
+    --sitting: #22c55e;
+    --standing: #f59e0b;
+    --walking: #06b6d4;
+    --running: #ef4444;
+  }
+
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg: #f6f7fb;
+      --card: rgba(255,255,255,0.9);
+      --card2: rgba(255,255,255,0.75);
+      --stroke: rgba(15,23,42,0.10);
+      --text: rgba(15,23,42,0.92);
+      --muted: rgba(15,23,42,0.60);
+      --shadow: 0 18px 55px rgba(15,23,42,0.12);
+    }
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    color: var(--text);
+    background:
+      radial-gradient(1000px 480px at 12% 10%, rgba(34,197,94,0.18), transparent 60%),
+      radial-gradient(900px 540px at 88% 22%, rgba(6,182,212,0.20), transparent 55%),
+      radial-gradient(900px 540px at 70% 95%, rgba(245,158,11,0.18), transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+
+  .wrap{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 18px 40px;
+  }
+
+  .topbar{
+    display:flex;
+    align-items:flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .brand{
+    display:flex;
+    gap: 12px;
+    align-items:flex-start;
+  }
+  .logo{
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(34,197,94,0.95), rgba(6,182,212,0.85));
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .title{
+    margin:0;
+    font-size: 20px;
+    letter-spacing: 0.2px;
+  }
+  .subtitle{
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .pillbar{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--stroke);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .dot{
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(239,68,68,0.95);
+    box-shadow: 0 0 0 6px rgba(239,68,68,0.14);
+  }
+  .dot.online{
+    background: rgba(34,197,94,0.95);
+    box-shadow: 0 0 0 6px rgba(34,197,94,0.14);
+  }
+
+  .btn{
+    cursor:pointer;
+    user-select:none;
+    border: 1px solid var(--stroke);
+    background: var(--card2);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    transition: transform 120ms ease, background 120ms ease;
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn:active{ transform: translateY(0px); }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  @media (max-width: 900px){
+    .grid{ grid-template-columns: 1fr; }
+    .pillbar{ justify-content: flex-start; }
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--stroke);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .card h2{
+    margin:0 0 10px;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  .big{
+    display:flex;
+    align-items:flex-end;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .metric{
+    display:flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 220px;
+  }
+  .metric .value{
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .metric .hint{
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--stroke);
+    background: rgba(0,0,0,0.10);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  @media (prefers-color-scheme: light){
+    .badge{ background: rgba(15,23,42,0.04); }
+  }
+
+  .list{
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .row{
+    display:grid;
+    grid-template-columns: 160px 1fr 110px;
+    align-items:center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  @media (prefers-color-scheme: light){
+    .row{
+      background: rgba(15,23,42,0.03);
+      border-color: rgba(15,23,42,0.06);
+    }
+  }
+  @media (max-width: 520px){
+    .row{ grid-template-columns: 1fr; }
+  }
+
+  .label{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    font-weight: 650;
+    letter-spacing: 0.1px;
+  }
+  .swatch{
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--muted);
+  }
+  .time{
+    text-align:right;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    font-weight: 650;
+  }
+  .bar{
+    height: 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    overflow:hidden;
+  }
+  @media (prefers-color-scheme: light){
+    .bar{
+      border-color: rgba(15,23,42,0.10);
+      background: rgba(15,23,42,0.05);
+    }
+  }
+  .bar > i{
+    display:block;
+    height:100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(34,197,94,0.95), rgba(6,182,212,0.90));
+  }
+
+  .row.active{
+    outline: 2px solid rgba(255,255,255,0.20);
+    box-shadow: 0 0 0 6px rgba(255,255,255,0.06);
+  }
+  @media (prefers-color-scheme: light){
+    .row.active{
+      outline-color: rgba(15,23,42,0.14);
+      box-shadow: 0 0 0 6px rgba(15,23,42,0.06);
+    }
+  }
+
+  .footer{
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 12px;
+    display:flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1 class="title">Mol Harakat Monitoring</h1>
+        <p class="subtitle">Qurilmadan kelayotgan holat va vaqt statistikasi real-time ko‘rinishda.</p>
+      </div>
+    </div>
 
-<h1>🐄 Mol Harakat Monitoring</h1>
-<div id="status">Ulanish holati: <span id="online">❌</span></div>
+    <div class="pillbar">
+      <div class="pill" title="Ulanish holati">
+        <span id="onlineDot" class="dot" aria-hidden="true"></span>
+        <span><span id="onlineText">Offline</span></span>
+      </div>
+      <div class="pill" title="Oxirgi yangilanish">
+        <span>Yangilandi:</span>
+        <strong id="lastUpdate">—</strong>
+      </div>
+      <button id="themeBtn" class="btn" type="button" title="Tema">
+        Tema
+      </button>
+    </div>
+  </div>
 
-<div class="state-box lying" id="lying">Yotib turish: <span id="lying_ms">0</span> ms</div>
-<div class="state-box sitting" id="sitting">O‘tirib turish: <span id="sitting_ms">0</span> ms</div>
-<div class="state-box standing" id="standing">Turib turish: <span id="standing_ms">0</span> ms</div>
-<div class="state-box walking" id="walking">Yurish: <span id="walking_ms">0</span> ms</div>
-<div class="state-box running" id="running">Yugurish: <span id="running_ms">0</span> ms</div>
+  <div class="grid">
+    <div class="card">
+      <h2>Joriy holat</h2>
+      <div class="big">
+        <div class="metric">
+          <div id="currentState" class="value">—</div>
+          <div class="hint">Qurilma jo‘natayotgan oxirgi state</div>
+        </div>
+        <div class="badge">
+          <span>Jami vaqt:</span>
+          <strong id="totalTime">0s</strong>
+        </div>
+        <div class="badge">
+          <span>Yangilanish:</span>
+          <strong id="refreshRate">1s</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Qisqa ma’lumot</h2>
+      <div class="list" style="gap:12px">
+        <div class="row" style="grid-template-columns: 1fr;">
+          <div class="label"><span class="swatch" style="background: rgba(34,197,94,0.95)"></span>Online bo‘lsa — ma’lumot kelayotgan bo‘ladi</div>
+          <div style="color: var(--muted); font-size: 13px; line-height:1.35; margin-top:6px;">
+            Agar offline ko‘rinsa, Wi‑Fi / ESP32 ulanishini tekshiring.
+          </div>
+        </div>
+        <div class="row" style="grid-template-columns: 1fr;">
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
+            <div style="color: var(--muted); font-size: 13px;">Endpoint</div>
+            <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 12px; opacity: 0.9;">
+              <span>/status</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <h2>Holatlar bo‘yicha taqsimot</h2>
+    <div id="stateList" class="list"></div>
+  </div>
+
+  <div class="footer">
+    <div>AgroTech • Real-time monitoring</div>
+    <div id="errorText" aria-live="polite"></div>
+  </div>
+</div>
 
 <script>
-const onlineEl = document.getElementById("online");
+const STATES = [
+  { key: "lying",   label: "Yotib turish", color: "var(--lying)" },
+  { key: "sitting", label: "O‘tirib turish", color: "var(--sitting)" },
+  { key: "standing",label: "Turib turish", color: "var(--standing)" },
+  { key: "walking", label: "Yurish", color: "var(--walking)" },
+  { key: "running", label: "Yugurish", color: "var(--running)" },
+];
 
-async function updateStatus(){
+const onlineDot = document.getElementById("onlineDot");
+const onlineText = document.getElementById("onlineText");
+const lastUpdate = document.getElementById("lastUpdate");
+const currentState = document.getElementById("currentState");
+const totalTime = document.getElementById("totalTime");
+const refreshRate = document.getElementById("refreshRate");
+const stateList = document.getElementById("stateList");
+const errorText = document.getElementById("errorText");
+const themeBtn = document.getElementById("themeBtn");
+
+const REFRESH_MS = 1000;
+refreshRate.textContent = (REFRESH_MS / 1000) + "s";
+
+function msToHms(ms){
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ss = s % 60;
+  if (h > 0) return `${h} soat ${m} daq ${ss} son`;
+  if (m > 0) return `${m} daq ${ss} son`;
+  return `${ss} son`;
+}
+
+function titleCaseState(s){
+  if (!s) return "—";
+  const found = STATES.find(x => x.key === s);
+  return found ? found.label : String(s);
+}
+
+function fmtTime(d){
   try{
-    const res = await fetch("https://agro-tech-mzq2.onrender.com/status");
-    const data = await res.json();
-
-    onlineEl.textContent = data.online ? "🟢" : "❌";
-
-    ["lying","sitting","standing","walking","running"].forEach(state=>{
-      document.getElementById(state+"_ms").textContent = data.stats[state+"_ms"];
-    });
-
-  }catch(err){
-    console.error(err);
-    onlineEl.textContent = "❌";
+    return new Intl.DateTimeFormat("uz-UZ", { hour:"2-digit", minute:"2-digit", second:"2-digit" }).format(d);
+  }catch{
+    return d.toLocaleTimeString();
   }
 }
 
-// Har 1 sekund yangilash
-setInterval(updateStatus, 1000);
+function safeNumber(n){
+  const x = Number(n);
+  return Number.isFinite(x) ? x : 0;
+}
+
+function setOnline(isOnline){
+  onlineDot.classList.toggle("online", !!isOnline);
+  onlineText.textContent = isOnline ? "Online" : "Offline";
+}
+
+function renderRows(stats, activeKey, totalMs){
+  const total = Math.max(1, safeNumber(totalMs) || Object.values(stats || {}).reduce((a,b)=>a + safeNumber(b), 0));
+  stateList.innerHTML = STATES.map(({key,label,color}) => {
+    const ms = safeNumber(stats?.[key + "_ms"]);
+    const pct = Math.min(100, Math.max(0, (ms / total) * 100));
+    const active = key === activeKey ? "active" : "";
+    return `
+      <div class="row ${active}" data-key="${key}">
+        <div class="label">
+          <span class="swatch" style="background:${color}"></span>
+          <span>${label}</span>
+          <span style="color:var(--muted); font-weight:600;">(${pct.toFixed(1)}%)</span>
+        </div>
+        <div class="bar" aria-hidden="true"><i style="width:${pct.toFixed(2)}%; background:${color};"></i></div>
+        <div class="time">${msToHms(ms)}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function applyTheme(theme){
+  // theme: "light" | "dark" | "system"
+  document.documentElement.dataset.theme = theme;
+  if (theme === "system") {
+    delete document.documentElement.dataset.theme;
+    localStorage.removeItem("theme");
+    return;
+  }
+  localStorage.setItem("theme", theme);
+  // "prefers-color-scheme" orqali default bo'ladi; bu dataset faqat button uchun.
+}
+
+// Simple theme toggle: system -> dark -> light -> system
+function cycleTheme(){
+  const current = localStorage.getItem("theme") || "system";
+  const next = current === "system" ? "dark" : (current === "dark" ? "light" : "system");
+  applyTheme(next);
+  themeBtn.textContent = next === "system" ? "Tema: Auto" : (next === "dark" ? "Tema: Dark" : "Tema: Light");
+}
+
+// Initialize theme button text
+(() => {
+  const t = localStorage.getItem("theme") || "system";
+  themeBtn.textContent = t === "system" ? "Tema: Auto" : (t === "dark" ? "Tema: Dark" : "Tema: Light");
+})();
+themeBtn.addEventListener("click", cycleTheme);
+
+async function updateStatus(){
+  try{
+    const res = await fetch("/status", { cache: "no-store" });
+    if (!res.ok) throw new Error("Status error: " + res.status);
+    const data = await res.json();
+
+    setOnline(!!data.online);
+    currentState.textContent = titleCaseState(data.current_state);
+    totalTime.textContent = msToHms(safeNumber(data.totalTime_ms));
+    lastUpdate.textContent = fmtTime(new Date());
+
+    renderRows(data.stats || {}, data.current_state, data.totalTime_ms);
+    errorText.textContent = "";
+  }catch(err){
+    console.error(err);
+    setOnline(false);
+    lastUpdate.textContent = fmtTime(new Date());
+    errorText.textContent = "Aloqa yo‘q yoki /status ishlamayapti.";
+  }
+}
+
+setInterval(updateStatus, REFRESH_MS);
 updateStatus();
 </script>
 

@@ -43,8 +43,13 @@ wss.on("connection", (ws) => {
   });
 });
 
-// Static fayllar
-app.use(express.static(path.join(__dirname, "public")));
+// Static fayllar (index.html shu papkada turibdi)
+app.use(express.static(__dirname));
+
+// "/" request kelganda index.html ni qaytarish
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 // Realtime holat endpoint
 app.get("/status", (req, res) => {
